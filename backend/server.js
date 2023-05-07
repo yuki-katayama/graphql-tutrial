@@ -57,18 +57,28 @@ const typeDefs = gql`
 		author: String
 	}
 
-  # Union型を定義することで、複数の型をまとめて扱えるようになります
+  # Union型を定義することで、複数の型をまとめて扱える
 	union SearchResult = Book | Movie
 
 	type Query {
-		search: [SearchResult]
+		results(title: String): [SearchResult]
 	}
 `;
 
 const resolvers = {
 	Query: {
-		search: () => [...books, ...movies],
-	},
+		results: (parent, args) => {
+		  const { title } = args;
+		  // タイトルが指定されていない場合、すべての結果を返す
+		  if (!title) {
+			return [...books, ...movies];
+		  }
+		  // タイトルが指定されている場合、タイトルでフィルタリングする
+		  const filteredBooks = books.filter(book => book.title.includes(title));
+		  const filteredMovies = movies.filter(movie => movie.title.includes(title));
+		  return [...filteredBooks, ...filteredMovies];
+		},
+	  },
 };
 
 
