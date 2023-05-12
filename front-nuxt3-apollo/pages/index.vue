@@ -2,10 +2,10 @@
 <template>
 	<p v-for="r in data.results" :key="r">There are {{ r || 0 }}</p>
 	<button @click="add">button</button>
-	<main>
+	<!-- <main>
 		<ContentDoc />
-	</main>
-
+	</main> -->
+	{{ messages }}
   </template>
   
   <script lang="ts" setup>
@@ -32,7 +32,25 @@
 	  }
 	}
   `
-  
+
+const { result } = useSubscription(gql`
+  subscription {
+    bookAdded {
+      title
+      author
+    }
+  }
+`);
+
+const messages = ref([]);
+
+watch(result, (newValue, oldValue) => {
+  if (newValue && newValue.data && newValue.data.bookAdded) {
+    messages.value.push(newValue.data.bookAdded);
+  }
+}, { immediate: true });
+
+
   const variables = { title: null }
   const { data } = await useAsyncQuery(queryGet, variables)
   const { mutate: mutateAdd } = useMutation(mutationAdd);
@@ -48,7 +66,7 @@
 	console.log(createdData);
   
 	// データの更新
-	await useAsyncQuery(queryGet, variables)
+	// await useAsyncQuery(queryGet, variables)
   }
   
   </script>

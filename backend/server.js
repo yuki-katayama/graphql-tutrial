@@ -1,4 +1,7 @@
-const { ApolloServer, gql, pubsub } = require("apollo-server");
+const { ApolloServer, gql } = require("apollo-server");
+const { PubSub } = require('graphql-subscriptions');
+
+const pubsub = new PubSub();
 
 /**
  * @typedef BookModel
@@ -126,7 +129,7 @@ const resolvers = {
 			author: input.author,
 		  };
 		  movies.push(newMovie);
-		  pubsub.publish('MOVIE_ADDED', { movieAdded: newMovie });
+		//   pubsub.publish('MOVIE_ADDED', { movieAdded: newMovie });
 		  return newMovie;
 		},
 	},
@@ -144,9 +147,14 @@ const resolvers = {
 
 const server = new ApolloServer({
 	typeDefs,
-    resolvers
+    resolvers,
+	subscriptions: {
+        path: '/graphql',
+        onConnect: () => console.log('Connected to websocket'),
+    }
 })
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
     console.log(`🚀 Server ready at ${url}`);
+    console.log(`🚀 Subscriptions ready at ${subscriptionsUrl}`);
 });
