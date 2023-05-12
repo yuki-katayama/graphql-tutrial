@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, pubsub } = require("apollo-server");
 
 /**
  * @typedef BookModel
@@ -82,6 +82,12 @@ const typeDefs = gql`
 		# createMovie ミューテーションは、新しいMovieオブジェクトを作成し、movies 配列に追加します。
 		createMovie(input: CreateMovieInput!): MovieModel
 	}
+
+	  # 追加: Subscription
+	type Subscription {
+		bookAdded: BookModel
+		movieAdded: MovieModel
+	}
 `;
 
 const resolvers = {
@@ -108,6 +114,7 @@ const resolvers = {
 			author: input.author,
 		  };
 		  books.push(newBook);
+		  pubsub.publish('BOOK_ADDED', { bookAdded: newBook });
 		  return newBook;
 		},
 		// createMovie ミューテーションのリゾルバーは、新しいMovieオブジェクトを作成し、movies 配列に追加します。
@@ -119,9 +126,19 @@ const resolvers = {
 			author: input.author,
 		  };
 		  movies.push(newMovie);
+		  pubsub.publish('MOVIE_ADDED', { movieAdded: newMovie });
 		  return newMovie;
 		},
 	},
+	// 既存のリゾルバ
+	Subscription: {
+		bookAdded: {
+		  subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+		},
+		movieAdded: {
+		  subscribe: () => pubsub.asyncIterator(['MOVIE_ADDED']),
+		},
+	  },
 };
 
 
