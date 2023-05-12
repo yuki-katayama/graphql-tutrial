@@ -1,0 +1,25 @@
+type Query {
+	people: [Person!]!
+	latestTweets: [Tweet!]!
+}
+
+type Mutation {
+	addPerson(name: String!, age: Int!, isAdult: Boolean!, bio: String): Person!
+	addTweets(description: String!, person: ID!): Tweet!
+	deleteTweet(tweet: ID!): Tweet
+}
+
+type Tweet {
+	_id: ID!
+	description: String!
+	likes: Int!
+	person: Person!
+}
+
+type Person {
+	id: ID!
+	name: String!
+	age: Int!
+	isAdult: Boolean!
+	bio: String
+}
