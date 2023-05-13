@@ -5,8 +5,12 @@ type Query {
 
 type Mutation {
 	addPerson(name: String!, age: Int!, isAdult: Boolean!, bio: String): Person!
-	addTweets(description: String!, person: ID!): Tweet!
+	addTweet(description: String!, person: ID!): Tweet!
 	deleteTweet(tweet: ID!): Tweet
+}
+
+type Subscription {
+	tweetAdded: Tweet
 }
 
 type Tweet {
@@ -22,4 +26,5 @@ type Person {
 	age: Int!
 	isAdult: Boolean!
 	bio: String
+	tweets: [Tweet!]!
 }
