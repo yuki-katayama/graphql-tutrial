@@ -1,0 +1,6 @@
+subscription PostFeed {
+  postCreated {
+    author
+    comment
+  }
+}
