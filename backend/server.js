@@ -1,7 +1,5 @@
 const { ApolloServer, gql } = require("apollo-server");
-const { PubSub } = require('graphql-subscriptions');
-
-const pubsub = new PubSub();
+const context = require("./context");
 
 /**
  * @typedef BookModel
@@ -146,12 +144,9 @@ const resolvers = {
 
 
 const server = new ApolloServer({
-	typeDefs,
+	typeDefs: require("fs").readFileSync("./schema.gql").toString(),
     resolvers,
-	subscriptions: {
-        path: '/graphql',
-        onConnect: () => console.log('Connected to websocket'),
-    }
+	context,
 })
 
 server.listen().then(({ url, subscriptionsUrl }) => {
