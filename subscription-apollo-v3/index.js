@@ -20,7 +20,7 @@ const MONGODB = "mongodb://localhost:27017";
 	})
 
 	const subscriptionServer = SubscriptionServer.create(
-		{schema, execute, subscribe },
+		{ schema, execute, subscribe },
 		{ server: httpServer, path: "/graphql" }
 	)
 

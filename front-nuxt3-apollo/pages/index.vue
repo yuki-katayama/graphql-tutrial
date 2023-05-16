@@ -1,73 +1,73 @@
 
 <template>
-	<p v-for="r in data.results" :key="r">There are {{ r || 0 }}</p>
+	<!-- <p v-for="r in data.results" :key="r">There are {{ r || 0 }}</p> -->
 	<button @click="add">button</button>
 	<!-- <main>
 		<ContentDoc />
 	</main> -->
-	{{ messages }}
+	<!-- {{ messages }} -->
+	a{{ data }}
   </template>
-  
-  <script lang="ts" setup>
-  const queryGet = gql`
-	query($title: String) {
-	  results(title: $title) {
-		... on BookModel {
-		  title
-		  author
-		}
-		... on MovieModel {
-		  title
-		  author
-		}
-	  }
-	}
-  `
-  
-  const mutationAdd = gql`
-	mutation Mutation($input: CreateBookInput!) {
-	  createBook(input: $input) {
-		author
-		title
-	  }
-	}
-  `
 
-const { result } = useSubscription(gql`
+<script lang="ts" setup>
+
+const queryGet = gql`
+	query Query($messageId: ID!) {
+		message(id: $messageId) {
+			createdBy
+			text
+		}
+	}
+`
+const mutationAdd = gql`
+	mutation Mutation($messageInput: MessageInput) {
+		createMessage(messageInput: $messageInput) {
+			text
+			createdBy
+		}
+	}
+`
+
+const subscriptionQuery = gql`
   subscription {
-    bookAdded {
-      title
-      author
+    messageCreated {
+      createdBy
+      text
     }
   }
-`);
+`
 
-const messages = ref([]);
+const { result, onResult, onError } = useSubscription(subscriptionQuery);
 
-watch(result, (newValue, oldValue) => {
-  if (newValue && newValue.data && newValue.data.bookAdded) {
-    messages.value.push(newValue.data.bookAdded);
-  }
-}, { immediate: true });
+onResult((r) => {
+		data.value = r.data as any;
+	});
+	
+	onError((e) => {
+		console.error(e);
+	});
 
+// const messages = ref([]);
 
-  const variables = { title: null }
-  const { data } = await useAsyncQuery(queryGet, variables)
-  const { mutate: mutateAdd } = useMutation(mutationAdd);
-  
-  const add = async () => {
-	const newBookInput = {
-	  title: '新しい本のタイトル',
-	  author: '新しい本の著者',
+const variables = { $messageId: "6460988b5815039025ea828b" }
+const { data, refresh } = await useAsyncQuery(queryGet, variables)
+
+const { mutate: mutateAdd } = useMutation(mutationAdd);
+
+const subscribe = ref(false);
+
+const add = async () => {
+	subscribe.value = true;
+
+	const newsMessageInput = {
+		text: 'text1',
+		username: 'name2',
 	}
-  
 	// データの追加
-	const { data: createdData } = await mutateAdd({ input: newBookInput });
+	
+	const { data: createdData } = await mutateAdd({ messageInput: newsMessageInput });
 	console.log(createdData);
-  
 	// データの更新
 	// await useAsyncQuery(queryGet, variables)
-  }
-  
-  </script>
-  
+}
+</script>

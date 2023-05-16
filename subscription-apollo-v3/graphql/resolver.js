@@ -1,5 +1,5 @@
 const Message = require("../models/Message");
-const { PubSub } = require("graphql-subscriptions")
+const { PubSub, withFilter } = require("graphql-subscriptions")
 
 const pubsub = new PubSub();
 
@@ -12,12 +12,14 @@ module.exports = {
 			})
 
 			const res = await newMessage.save();
+			console.log('New message saved:', res);  // 追加
 			pubsub.publish("MESSAGE_CREATED", {
 				messageCreated: {
 					text: text,
 					createdBy: username,
 				}
 			})
+			console.log('MESSAGE_CREATED event published');  // 追加
 
 			return {
 				id: res.id,
@@ -27,10 +29,21 @@ module.exports = {
 	},
 	Subscription: {
 		messageCreated: {
-			subscribe: () => pubsub.asyncIterator("MESSAGE_CREATED")
+		  subscribe: withFilter(
+			() => {console.log("a"), pubsub.asyncIterator("MESSAGE_CREATED")},
+			(payload, variables) => {
+			  console.log('Received MESSAGE_CREATED event:', payload);  // 追加
+			  return true;
+			}
+		  )
 		}
 	},
 	Query: {
-		message: (_, {ID}) => Message.findById(ID)
+		message: (_, {ID}) => {
+			console.log(ID);
+			const message = Message.findById("6461108aee2f37b608a0cd14").exec()
+			console.log(message);
+			return message
+		}
 	}
 }

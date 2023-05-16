@@ -1,12 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	modules: ['@nuxtjs/apollo'],
-	apollo: {
-	  clients: {
-		default: {
-		  httpEndpoint: 'http://localhost:4000/',
-		  wsEndpoint: 'ws://localhost:4000/graphql',
-		}
-	  },
-	},
-})
+  modules: ["@nuxtjs/apollo"],
+  apollo: {
+    clients: {
+		default: './apollo/default.ts',
+    },
+  },
+});
