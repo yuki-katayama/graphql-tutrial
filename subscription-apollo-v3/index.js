@@ -7,6 +7,8 @@ const { ApolloServer } = require("apollo-server-express")
 const mongoose = require("mongoose")
 const typeDefs = require("./graphql/typeDefs")
 const resolvers = require("./graphql/resolver")
+const { WebSocketServer } = require("ws");
+const  { useServer } = require("graphql-ws/lib/use/ws");
 
 const MONGODB = "mongodb://localhost:27017";
 
@@ -19,10 +21,12 @@ const MONGODB = "mongodb://localhost:27017";
 		resolvers
 	})
 
-	const subscriptionServer = SubscriptionServer.create(
-		{ schema, execute, subscribe },
-		{ server: httpServer, path: "/graphql" }
-	)
+	const wsServer = new WebSocketServer({
+		server: httpServer,
+		path: "/graphql"
+	})
+
+	const serverCleanup = useServer({ schema }, wsServer);
 
 	const server = new ApolloServer({
 		schema,
@@ -31,7 +35,7 @@ const MONGODB = "mongodb://localhost:27017";
 				async serverWillStart() {
 					return {
 						async drainServer() {
-							subscriptionServer.close();
+							serverCleanup.dispose();
 						}
 					}
 				}

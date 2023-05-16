@@ -29,13 +29,7 @@ module.exports = {
 	},
 	Subscription: {
 		messageCreated: {
-		  subscribe: withFilter(
-			() => {console.log("a"), pubsub.asyncIterator("MESSAGE_CREATED")},
-			(payload, variables) => {
-			  console.log('Received MESSAGE_CREATED event:', payload);  // 追加
-			  return true;
-			}
-		  )
+		  subscribe: () => pubsub.asyncIterator("MESSAGE_CREATED")
 		}
 	},
 	Query: {
