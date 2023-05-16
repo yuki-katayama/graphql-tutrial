@@ -40,12 +40,13 @@ const subscriptionQuery = gql`
 const { result, onResult, onError } = useSubscription(subscriptionQuery);
 
 onResult((r) => {
-		data.value = r.data as any;
-	});
-	
-	onError((e) => {
-		console.error(e);
-	});
+	data.value = r.data as any;
+});
+
+onError((e) => {
+	console.log("aa");
+	console.log(e);
+});
 
 // const messages = ref([]);
 
