@@ -13,6 +13,7 @@ module.exports = gql`
 
 	type Query {
 		message(id: ID!): Message
+		messages: [Message]
 	}
 
 	type Mutation {

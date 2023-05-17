@@ -38,6 +38,7 @@ module.exports = {
 			const message = Message.findById("6461108aee2f37b608a0cd14").exec()
 			console.log(message);
 			return message
-		}
+		},
+		messages: (_) => Message.find().exec()
 	}
 }

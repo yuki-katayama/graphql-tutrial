@@ -2,11 +2,19 @@
 <template>
 	<!-- <p v-for="r in data.results" :key="r">There are {{ r || 0 }}</p> -->
 	<button @click="add">button</button>
+	<input v-model="input"/>
 	<!-- <main>
 		<ContentDoc />
 	</main> -->
 	<!-- {{ messages }} -->
-	a{{ data }}
+	<template v-if="result && result.messageCreated">
+		{{ result.messageCreated.text }}
+	</template>
+	<template v-if="messages">
+		<template v-for="(m, i) in messages.messages" :key="m.id">
+			<p>{{i}} {{ m.text }}</p>
+		</template>
+	</template>
   </template>
 
 <script lang="ts" setup>
@@ -14,6 +22,15 @@
 const queryGet = gql`
 	query Query($messageId: ID!) {
 		message(id: $messageId) {
+			createdBy
+			text
+		}
+	}
+`
+
+const queryMessages = gql`
+	query Messages {
+		messages {
 			createdBy
 			text
 		}
@@ -37,35 +54,43 @@ const subscriptionQuery = gql`
   }
 `
 
-const { result, onResult, onError } = useSubscription(subscriptionQuery);
+type Message = {
+	text: string,
+	createdBy: string
+}
+type Messages = {
+	messages: Message[]
+}
 
+type SubscriptionMessage = {
+	messageCreated: Message
+}
+
+const { result, onResult, onError, loading } = useSubscription<SubscriptionMessage>(subscriptionQuery);
 onResult((r) => {
-	data.value = r.data as any;
+	result.value = r.data;
+	refetch();
 });
 
 onError((e) => {
-	console.log("aa");
 	console.log(e);
 });
 
-// const messages = ref([]);
+const input = ref<string>("");
+const { mutate: mutateAdd } = useMutation<Message>(mutationAdd);
+const { result: messages, refetch, loading: load } = useLazyQuery<Messages>(queryMessages)
+	refetch();
+console.log(messages.value)
 
-const variables = { $messageId: "6460988b5815039025ea828b" }
-const { data, refresh } = await useAsyncQuery(queryGet, variables)
-
-const { mutate: mutateAdd } = useMutation(mutationAdd);
-
-const subscribe = ref(false);
-
+watch(messages, (v) => (messages.value = v));
 const add = async () => {
-	subscribe.value = true;
 
 	const newsMessageInput = {
-		text: 'text1',
+		text: input.value,
 		username: 'name2',
 	}
 	// データの追加
-	
+
 	const { data: createdData } = await mutateAdd({ messageInput: newsMessageInput });
 	console.log(createdData);
 	// データの更新
